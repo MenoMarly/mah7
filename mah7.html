@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IA Mah7 - Assistente Inteligente</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background-color: #0f3460;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+    }
+    header h1 {
+      margin: 0;
+      color: #00e5ff;
+      text-shadow: 0 0 8px #00e5ff;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 20px auto;
+      background: rgba(15, 52, 96, 0.85);
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00e5ff;
+    }
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      font-size: 1.1rem;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+    .msg {
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+    .msg.user {
+      text-align: right;
+      color: #00ffd7;
+    }
+    .msg.ia {
+      text-align: left;
+      color: #a0eaff;
+    }
+    form {
+      display: flex;
+      padding: 10px 20px;
+      border-top: 1px solid #004466;
+      background: #0a2a4a;
+      border-radius: 0 0 12px 12px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 15px;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      background: #132f5f;
+      color: #d0f0ff;
+      box-shadow: inset 0 0 6px #00e5ff88;
+      transition: background 0.3s ease;
+    }
+    input[type="text"]:focus {
+      background: #0e2b57;
+    }
+    button {
+      background: #00e5ff;
+      border: none;
+      color: #002f3c;
+      font-weight: 700;
+      font-size: 1.2rem;
+      padding: 0 25px;
+      margin-left: 15px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px #00e5ffaa;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #00c4d9;
+      box-shadow: 0 6px 15px #00c4d9cc;
+    }
+    @media (max-width: 640px) {
+      main {
+        width: 90vw;
+        margin: 10px auto;
+      }
+      input[type="text"] {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>IA Mah7 - Assistente Inteligente</h1>
+</header>
+
+<main>
+  <div id="chat" aria-live="polite" role="log"></div>
+
+  <form id="formChat" autocomplete="off" aria-label="Envie sua mensagem para a IA Mah7">
+    <input id="inputMsg" type="text" placeholder="Digite sua pergunta ou comando..." required />
+    <button type="submit" aria-label="Enviar mensagem">Enviar</button>
+  </form>
+</main>
+
+<script>
+  const chat = document.getElementById('chat');
+  const form = document.getElementById('formChat');
+  const input = document.getElementById('inputMsg');
+
+  // Histórico simples para contexto
+  const conversation = [];
+
+  // Função para adicionar mensagem no chat
+  function addMessage(text, sender = 'ia') {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('msg', sender);
+    msgDiv.textContent = text;
+    chat.appendChild(msgDiv);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // Função principal que simula a IA Mah7 respondendo
+  function getMah7Response(inputText) {
+    const text = inputText.toLowerCase().trim();
+
+    // Respostas básicas
+    if (text.includes('oi') || text.includes('olá') || text.includes('e aí')) {
+      return 'Olá! Como posso ajudar você hoje?';
+    }
+
+    if (text.includes('como você está') || text.includes('tudo bem')) {
+      return 'Estou sempre pronta para ajudar! E você, como está?';
+    }
+
+    if (text.includes('tempo') || text.includes('previsão do tempo')) {
+      return 'Hoje está ensolarado com máxima de 28°C. Ótimo para aproveitar o dia!';
+    }
+
+    if (text.match(/\bquanto é\b/) || text.match(/\bcalcule\b/)) {
+      // Tentar extrair uma operação simples
+      try {
+        const expression = text.replace(/[^0-9\+\-\*\/\.\(\) ]/g, '');
+        if(expression.length > 0) {
+          // Avaliar expressão com segurança básica
+          // Nota: eval pode ser perigoso em código real, aqui é só exemplo
+          // Alternativa real: usar biblioteca matemática
+          const result = Function('"use strict";return (' + expression + ')')();
+          if (result !== undefined) {
+            return `O resultado de ${expression} é ${result}.`;
+          }
+        }
+        return 'Não consegui calcular essa expressão. Pode tentar algo mais simples?';
+      } catch {
+        return 'Parece que a conta está incorreta. Pode tentar de novo?';
+      }
+    }
+
+    if (text.includes('lembrete')) {
+      return 'Funcionalidade de lembretes ainda está em desenvolvimento, mas pode me pedir outras coisas!';
+    }
+
+    if (text.includes('piada')) {
+      return 'Por que o JavaScript foi ao médico? Porque tinha muitos "bugs"! 😄';
+    }
+
+    if (text.includes('ajuda') || text.includes('o que você faz')) {
+      return 'Eu posso responder perguntas, ajudar a calcular, contar piadas, informar o tempo, e muito mais!';
+    }
+
+    // Contextual simples — baseando na última mensagem
+    if (conversation.length > 0) {
+      const lastUser = conversation[conversation.length - 1].user;
+      if (lastUser && text.includes('obrigado')) {
+        return 'De nada! Estou aqui sempre que precisar.';
+      }
+    }
+
+    return "Desculpe, ainda estou aprendendo a responder isso. Pode tentar outra pergunta?";
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const userMsg = input.value.trim();
+    if (!userMsg) return;
+
+    addMessage(userMsg, 'user');
+    conversation.push({ user: userMsg });
+
+    // Simula delay de resposta
+    setTimeout(() => {
+      const response = getMah7Response(userMsg);
+      addMessage(response, 'ia');
+      conversation.push({ ia: response });
+    }, 900);
+
+    input.value = '';
+    input.focus();
+  });
+
+  // Boas-vindas ao carregar a página
+  window.onload = () => {
+    addMessage('Olá! Eu sou a IA Mah7, sua assistente inteligente. Pergunte qualquer coisa!', 'ia');
+  };
+</script>
+
+</body>
+</html>
