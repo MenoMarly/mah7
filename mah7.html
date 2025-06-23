@@ -1,137 +1,257 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mah7 - Sua Super IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IA Mah7</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" />
   <style>
     body {
-      margin: 0;
-      background-color: #0a0a0a;
-      font-family: 'Segoe UI', sans-serif;
-      color: #fff;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0; padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
       height: 100vh;
-      padding: 20px;
     }
-
     header {
-      margin-top: 20px;
+      background: #1e1e1e;
+      padding: 1rem;
       text-align: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #7b68ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
-
-    h1 {
-      font-size: 2.5em;
-      background: linear-gradient(to right, #8e2de2, #4a00e0);
-      -webkit-background-clip: text;
-      color: transparent;
+    header img {
+      width: 32px;
+      height: 32px;
     }
-
-    .terminal {
-      background-color: #1c1c1c;
-      border-radius: 10px;
-      padding: 20px;
-      width: 100%;
-      max-width: 600px;
-      box-shadow: 0 0 10px #4a00e0;
-      margin-top: 30px;
-      overflow-y: auto;
-      height: 400px;
+    main {
+      flex: 1;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      overflow: auto;
+      gap: 1rem;
     }
-
-    .output {
-      white-space: pre-wrap;
-      line-height: 1.4em;
-      font-family: monospace;
-      color: #adadad;
+    #chat {
+      flex: 1;
+      background: #222;
+      padding: 1rem;
+      border-radius: 8px;
       overflow-y: auto;
-      flex-grow: 1;
-    }
-
-    .input-line {
       display: flex;
-      margin-top: 10px;
+      flex-direction: column;
+      gap: 0.8rem;
+      scrollbar-width: thin;
+      scrollbar-color: #7b68ee transparent;
     }
-
-    input {
-      flex-grow: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #2a2a2a;
+    #chat::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #chat::-webkit-scrollbar-thumb {
+      background-color: #7b68ee;
+      border-radius: 4px;
+    }
+    .msg {
+      max-width: 70%;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      line-height: 1.3;
+      font-size: 1rem;
+    }
+    .user {
+      background: #7b68ee;
+      align-self: flex-end;
       color: white;
-      font-size: 1em;
     }
-
+    .ai {
+      background: #333;
+      align-self: flex-start;
+      color: #ccc;
+      font-style: italic;
+    }
+    footer {
+      padding: 1rem;
+      background: #1e1e1e;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    input[type=text] {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      background: #333;
+      color: #eee;
+    }
+    input[type=text]::placeholder {
+      color: #999;
+    }
     button {
-      margin-left: 10px;
-      padding: 10px 20px;
+      background: #7b68ee;
       border: none;
-      border-radius: 5px;
-      background-color: #4a00e0;
       color: white;
-      cursor: pointer;
       font-weight: bold;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
       transition: background-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #6b00f5;
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
     }
-
+    button:hover:not(:disabled) {
+      background: #5a4fd1;
+    }
     @media (max-width: 600px) {
-      .terminal {
-        height: 350px;
+      .msg {
+        max-width: 90%;
+      }
+      header {
+        font-size: 1.4rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Mah7 — Inteligência Avançada</h1>
-    <p>Pronta para te ajudar em tudo. Sem limites. Com segurança total.</p>
+    <img src="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" alt="Cérebro IA" />
+    IA Mah7
   </header>
-
-  <div class="terminal">
-    <div class="output" id="output">
-      👋 Olá, Marlyson. Sou a Mah7. O que você precisa agora?
-    </div>
-    <div class="input-line">
-      <input id="userInput" type="text" placeholder="Digite seu comando..." autofocus />
-      <button onclick="processCommand()" aria-label="Enviar comando">Enviar</button>
-    </div>
-  </div>
+  <main>
+    <div id="chat"></div>
+  </main>
+  <footer>
+    <input id="inputMsg" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
+    <button id="btnSend" disabled>Enviar</button>
+    <button id="btnClear" title="Limpar chat" aria-label="Limpar chat">🗑️</button>
+  </footer>
 
   <script>
-    function processCommand() {
-      const input = document.getElementById("userInput");
-      const output = document.getElementById("output");
-      const command = input.value.trim();
-      if (!command) return;
+    const chat = document.getElementById('chat');
+    const inputMsg = document.getElementById('inputMsg');
+    const btnSend = document.getElementById('btnSend');
+    const btnClear = document.getElementById('btnClear');
 
-      output.innerHTML += `\n\n🧑‍💻 Você: ${command}`;
+    // Habilita botão só se tiver texto
+    inputMsg.addEventListener('input', () => {
+      btnSend.disabled = inputMsg.value.trim() === '';
+    });
 
-      // Simulação de resposta
-      let response = "🤖 Mah7: Processando...";
+    // Adiciona mensagem no chat (user ou ai)
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.classList.add('msg', sender);
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-      if (command.toLowerCase().includes("ajuda")) {
-        response = "🤖 Mah7: Claro! Eu posso organizar tarefas, responder perguntas, criar textos, imagens, ou te ajudar em qualquer desafio.";
-      } else if (command.toLowerCase().includes("treino")) {
-        response = "🤖 Mah7: Seu treino está pronto! Dividido em A, B e C conforme sua rotina.";
-      } else if (command.toLowerCase().includes("obrigado")) {
-        response = "🤖 Mah7: Sempre à disposição, Marlyson.";
+    // Salvar histórico no localStorage
+    function saveHistory(history) {
+      localStorage.setItem('mah7_chat_history', JSON.stringify(history));
+    }
+
+    // Carregar histórico do localStorage
+    function loadHistory() {
+      const h = localStorage.getItem('mah7_chat_history');
+      return h ? JSON.parse(h) : [];
+    }
+
+    // Atualiza o chat visual com o histórico
+    function renderHistory() {
+      chat.innerHTML = '';
+      const history = loadHistory();
+      history.forEach(({text, sender}) => {
+        addMessage(text, sender);
+      });
+    }
+
+    // Resposta simples da IA Mah7
+    function respondTo(message) {
+      message = message.toLowerCase();
+
+      // Comandos simples
+      if(message.includes('oi') || message.includes('olá')) {
+        return 'Olá! Eu sou a Mah7, sua assistente virtual.';
+      }
+      if(message.includes('como você está')) {
+        return 'Estou sempre pronta para ajudar você!';
+      }
+      if(message.includes('ajuda')) {
+        return `Você pode me perguntar sobre:
+- Informações gerais
+- Data e hora atual
+- Comandos básicos
+- Atualizar projeto Mah7
+Experimente!`;
+      }
+      if(message.includes('data') || message.includes('hora')) {
+        return `Agora é: ${new Date().toLocaleString('pt-BR')}`;
+      }
+      if(message.includes('projeto mah7')) {
+        return 'Este é o projeto Mah7, sua IA assistente pessoal em desenvolvimento!';
       }
 
-      output.innerHTML += `\n${response}`;
-      input.value = "";
-      output.scrollTop = output.scrollHeight;
+      // Resposta default
+      return 'Desculpe, não entendi. Pode tentar outra pergunta?';
     }
+
+    // Carregar histórico ao abrir a página
+    renderHistory();
+
+    // Enviar mensagem
+    btnSend.addEventListener('click', () => {
+      const userText = inputMsg.value.trim();
+      if(!userText) return;
+
+      addMessage(userText, 'user');
+
+      // Salvar no histórico
+      const history = loadHistory();
+      history.push({text: userText, sender: 'user'});
+
+      inputMsg.value = '';
+      btnSend.disabled = true;
+
+      setTimeout(() => {
+        const reply = respondTo(userText);
+        addMessage(reply, 'ai');
+
+        history.push({text: reply, sender: 'ai'});
+        saveHistory(history);
+      }, 800);
+    });
+
+    // Enter para enviar
+    inputMsg.addEventListener('keydown', e => {
+      if(e.key === 'Enter' && !btnSend.disabled) {
+        btnSend.click();
+      }
+    });
+
+    // Limpar chat e histórico
+    btnClear.addEventListener('click', () => {
+      if(confirm('Deseja realmente limpar todo o histórico do chat?')) {
+        localStorage.removeItem('mah7_chat_history');
+        chat.innerHTML = '';
+      }
+    });
   </script>
 </body>
 </html>
