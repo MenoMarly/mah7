@@ -3,169 +3,82 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mah7 - IA Suprema com APIs Reais</title>
+<title>Mah7 IA Simples - Chave Local</title>
 <style>
-  body { font-family: Arial,sans-serif; margin:0; padding:0; background:#121212; color:#fff; transition: background 0.3s, color 0.3s; display:flex; flex-direction:column; height:100vh; }
-  body.light { background:#f0f0f0; color:#000; }
-  header { padding:1em; text-align:center; background:#6200ea; color:#fff; font-size:1.4em; user-select:none; }
-  main { flex:1; display:flex; flex-direction:column; padding:1em; overflow:hidden; }
-  #chatWindow { flex:1; background:#1e1e1e; border-radius:8px; padding:1em; overflow-y:auto; margin-bottom:1em; font-size:1.1em; box-shadow: inset 0 0 5px #000; }
-  body.light #chatWindow { background:#fff; color:#000; box-shadow: inset 0 0 5px #ccc; }
-  .message { margin-bottom:1em; line-height:1.4em; }
-  .message .role { font-weight:bold; margin-bottom:0.3em; user-select:none; }
-  .message.user { color:#bb86fc; text-align:right; }
-  .message.mah7 { color:#03dac6; text-align:left; }
-  #userInput { width:100%; min-height:48px; resize:none; padding:0.5em; border-radius:6px; border:none; font-size:1.1em; box-sizing:border-box; outline-offset:2px; font-family:inherit; }
-  body.light #userInput { background:#eee; color:#000; }
-  #inputArea { display:flex; gap:0.5em; margin-bottom:1em; }
-  button { background:#6200ea; border:none; color:#fff; padding:0 1em; border-radius:6px; font-size:1.1em; cursor:pointer; user-select:none; transition: background 0.2s ease-in-out; }
-  button:hover { background:#3700b3; }
-  #panel { display:flex; gap:1em; justify-content:center; padding-bottom:0.5em; user-select:none; }
-  @media (max-width:480px) { header { font-size:1.2em; } button { font-size:1em; padding:0.4em 0.8em; } }
+  body { background: #121212; color: #eee; font-family: Arial, sans-serif; margin: 0; padding: 1em; display: flex; flex-direction: column; height: 100vh; }
+  #chat { flex: 1; overflow-y: auto; background: #222; border-radius: 8px; padding: 1em; margin-bottom: 1em; }
+  .msg { margin-bottom: 1em; }
+  .user { text-align: right; color: #bb86fc; }
+  .mah7 { text-align: left; color: #03dac6; }
+  textarea { width: 100%; height: 60px; font-size: 1.1em; border-radius: 8px; border: none; padding: 0.5em; resize: none; }
+  button { margin-top: 0.5em; padding: 0.7em 1em; border: none; border-radius: 8px; background: #6200ea; color: white; font-size: 1.1em; cursor: pointer; }
 </style>
 </head>
 <body>
-<header>🧠 Mah7 - IA Suprema com APIs Reais</header>
-<main>
-  <div id="chatWindow" aria-live="polite" aria-label="Área de mensagens"></div>
-  <div id="inputArea">
-    <textarea id="userInput" placeholder="Fale com a Mah7..." rows="2" aria-label="Entrada de mensagem"></textarea>
-    <button id="sendBtn" aria-label="Enviar mensagem">Enviar</button>
-  </div>
-  <div id="panel">
-    <button id="themeToggle" aria-label="Alternar tema">🌗 Tema</button>
-    <button id="clearChat" aria-label="Limpar conversa">🧹 Limpar</button>
-    <button id="exportChat" aria-label="Exportar histórico">💾 Exportar</button>
-  </div>
-</main>
+  <div id="chat" aria-live="polite"></div>
+  <textarea id="input" placeholder="Escreva sua mensagem..."></textarea>
+  <button id="sendBtn">Enviar</button>
+
 <script>
-  const chatWindow = document.getElementById('chatWindow');
-  const userInput = document.getElementById('userInput');
+  let apiKey = null;
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
-  const themeToggle = document.getElementById('themeToggle');
-  const clearChatBtn = document.getElementById('clearChat');
-  const exportChatBtn = document.getElementById('exportChat');
 
-  // Sua chave OpenAI API (mantenha segura)
-  const openAiApiKey = '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';
-
-  // Sua chave OpenWeatherMap API já inserida aqui
-  const openWeatherApiKey = '37ab184e014a464188433057252306';
-
-  let chatHistory = JSON.parse(localStorage.getItem('mah7_history') || '[]');
-
-  function renderChat() {
-    chatWindow.innerHTML = '';
-    chatHistory.forEach(msg => {
-      const div = document.createElement('div');
-      div.classList.add('message');
-      div.classList.add(msg.role === 'Usuário' ? 'user' : 'mah7');
-      div.innerHTML = `<div class="role">${msg.role}:</div><div class="content">${escapeHtml(msg.content)}</div>`;
-      chatWindow.appendChild(div);
-    });
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function escapeHtml(text) {
+  function addMessage(text, sender) {
     const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    div.className = 'msg ' + sender;
+    div.textContent = (sender === 'user' ? 'Você: ' : 'Mah7: ') + text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
   }
 
   async function callOpenAI(message) {
-    const response = await fetch('https://api.openai.com/v1/chat/completions',{
+    if (!apiKey) {
+      apiKey = prompt('Por favor, digite sua chave OpenAI (não salve no código público)');
+      if (!apiKey) throw new Error('Chave OpenAI é necessária');
+    }
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type':'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
-        messages: [{role:'user', content: message}],
+        messages: [{role: 'user', content: message}],
         max_tokens: 500,
         temperature: 0.7
       })
     });
-    if(!response.ok) throw new Error('Erro ao chamar OpenAI API');
-    const data = await response.json();
-    return data.choices[0].message.content.trim();
-  }
-
-  async function callOpenWeather(city) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${openWeatherApiKey}&units=metric&lang=pt_br`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Erro ao buscar clima');
-    const data = await response.json();
-    return `Clima em ${data.name}: ${data.weather[0].description}, temperatura ${data.main.temp}°C, umidade ${data.main.humidity}%.`;
-  }
-
-  async function processInput(text) {
-    const lower = text.toLowerCase();
-    try {
-      if(lower.includes('clima em')) {
-        const city = text.split('clima em')[1].trim();
-        if (!city) return 'Por favor, diga o nome da cidade após "clima em".';
-        return await callOpenWeather(city);
-      }
-      if(lower.includes('seu nome')) return 'Sou a Mah7, sua inteligência suprema!';
-      if(lower.includes('o que você faz')) return 'Eu posso ajudar com várias tarefas, consultar APIs reais, aprender com você e muito mais.';
-      if(lower.includes('me ajude')) return 'Claro! Diga o que você precisa.';
-      return await callOpenAI(text);
-    } catch(e) {
-      console.error(e);
-      return 'Desculpe, não consegui processar sua solicitação no momento.';
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error?.message || 'Erro na API');
     }
+    const data = await res.json();
+    return data.choices[0].message.content;
   }
 
   async function sendMessage() {
-    const text = userInput.value.trim();
-    if(!text) return;
-    chatHistory.push({role: 'Usuário', content: text});
-    renderChat();
-    userInput.value = '';
-    const reply = await processInput(text);
-    chatHistory.push({role: 'Mah7', content: reply});
-    localStorage.setItem('mah7_history', JSON.stringify(chatHistory));
-    renderChat();
+    const message = input.value.trim();
+    if (!message) return;
+    addMessage(message, 'user');
+    input.value = '';
+    try {
+      const reply = await callOpenAI(message);
+      addMessage(reply, 'mah7');
+    } catch (e) {
+      addMessage('Erro: ' + e.message, 'mah7');
+    }
   }
 
   sendBtn.addEventListener('click', sendMessage);
-  userInput.addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !e.shiftKey){
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   });
-
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light');
-  });
-
-  clearChatBtn.addEventListener('click', () => {
-    if(confirm('Deseja realmente limpar todo o histórico?')){
-      chatHistory = [];
-      localStorage.removeItem('mah7_history');
-      renderChat();
-    }
-  });
-
-  exportChatBtn.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(chatHistory, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mah7_historico.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  renderChat();
 </script>
 </body>
 </html>
-
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
