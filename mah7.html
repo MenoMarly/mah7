@@ -1,195 +1,309 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IA Mah7</title>
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" />
-  <style>
-    body {
-      margin: 0;
-      background: #121212;
-      color: #eee;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      background: #1e1e1e;
-      color: #7b68ee;
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    main {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    #chat {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .msg {
-      max-width: 80%;
-      padding: 0.7rem 1rem;
-      border-radius: 20px;
-      word-wrap: break-word;
-      white-space: pre-wrap;
-    }
-    .user {
-      align-self: flex-end;
-      background-color: #7b68ee;
-      color: white;
-    }
-    .ai {
-      align-self: flex-start;
-      background-color: #333;
-      color: #ccc;
-      font-style: italic;
-    }
-    footer {
-      background: #1e1e1e;
-      display: flex;
-      gap: 0.5rem;
-      padding: 1rem;
-      align-items: center;
-    }
-    input[type="text"] {
-      flex: 1;
-      padding: 0.6rem;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      background: #333;
-      color: white;
-    }
-    button {
-      background: #7b68ee;
-      color: white;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mah7 - IA com Aprendizado Local e MCP</title>
+<style>
+  body {
+    margin: 0;
+    background: #121212;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: #1e1e1e;
+    color: #7b68ee;
+    padding: 1rem;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #mcpToggle {
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 1.3rem;
+  }
+  #mcpPanel {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-top: 1px solid #333;
+  }
+  main {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  #chat {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .msg {
+    max-width: 80%;
+    padding: 0.7rem 1rem;
+    border-radius: 20px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  .user { align-self: flex-end; background: #7b68ee; color: white; }
+  .ai   { align-self: flex-start; background: #333; color: #ccc; font-style: italic; }
+  footer {
+    background: #1e1e1e;
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    background: #333;
+    color: white;
+  }
+  button {
+    background: #7b68ee;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #555;
+    cursor: not-allowed;
+  }
+  select {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 0.4rem;
+    border-radius: 5px;
+  }
+</style>
 </head>
 <body>
-  <header>IA Mah7</header>
-  <main>
-    <div id="chat"></div>
-  </main>
-  <footer>
-    <input type="text" id="inputMsg" placeholder="Digite aqui..." />
-    <button id="btnMic">🎤</button>
-    <button id="btnSend" disabled>Enviar</button>
-    <button id="btnClear">🗑️</button>
-  </footer>
+<header>
+  Mah7 IA
+  <button id="mcpToggle">⚙️ MCP</button>
+</header>
 
-  <script>
-    const chat = document.getElementById("chat");
-    const inputMsg = document.getElementById("inputMsg");
-    const btnSend = document.getElementById("btnSend");
-    const btnClear = document.getElementById("btnClear");
-    const btnMic = document.getElementById("btnMic");
+<div id="mcpPanel">
+  <button id="btnClear">🗑️ Limpar histórico e aprendizado</button>
+  <button id="btnMic">🎤 Microfone</button>
+  <label>🤖 Modo:
+    <select id="modeSelect">
+      <option value="simples">Simples</option>
+      <option value="avancado">IA Simulada</option>
+    </select>
+  </label>
+  <button id="exportMCP">📤 Exportar JSON MCP</button>
+  <button id="copyMCP">📋 Copiar JSON MCP</button>
+</div>
 
-    inputMsg.addEventListener("input", () => {
-      btnSend.disabled = inputMsg.value.trim() === "";
-    });
+<main>
+  <div id="chat"></div>
+</main>
 
-    function addMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = "msg " + sender;
-      msg.textContent = text;
-      chat.appendChild(msg);
-      chat.scrollTop = chat.scrollHeight;
-    }
+<footer>
+  <input type="text" id="inputMsg" placeholder="Digite aqui..." />
+  <button id="btnSend" disabled>Enviar</button>
+</footer>
 
-    function respondTo(message) {
-      const msg = message.toLowerCase();
-      if (msg.includes("oi") || msg.includes("olá")) return "Olá! Eu sou a Mah7.";
-      if (msg.includes("como você está")) return "Estou ótima! Pronta pra te ajudar.";
-      if (msg.includes("data") || msg.includes("hora")) return new Date().toLocaleString("pt-BR");
-      if (msg.includes("projeto mah7")) return "O projeto Mah7 é a IA que você está usando agora!";
-      return "Desculpe, não entendi. Pode repetir?";
-    }
+<script>
+  // Elementos DOM
+  const chat = document.getElementById("chat");
+  const inputMsg = document.getElementById("inputMsg");
+  const btnSend = document.getElementById("btnSend");
+  const btnClear = document.getElementById("btnClear");
+  const btnMic = document.getElementById("btnMic");
+  const mcpToggle = document.getElementById("mcpToggle");
+  const mcpPanel = document.getElementById("mcpPanel");
+  const modeSelect = document.getElementById("modeSelect");
+  const btnExport = document.getElementById("exportMCP");
+  const btnCopy = document.getElementById("copyMCP");
 
-    function saveHistory() {
-      const all = [...chat.children].map(el => ({
-        text: el.textContent,
-        sender: el.classList.contains("user") ? "user" : "ai"
-      }));
-      localStorage.setItem("mah7_history", JSON.stringify(all));
-    }
+  // MCP padrão
+  const MCP_PADRAO = {
+    ativo: true,
+    botoes: {
+      limparHistorico: {icone: "🗑️", descricao: "Limpar todo o chat", funcao: "limparChat"},
+      microfone: {icone: "🎤", descricao: "Ativar reconhecimento de voz", disponivel: "webkitSpeechRecognition" in window || "SpeechRecognition" in window},
+      modoResposta: {icone: "🤖", descricao: "Alternar entre modos", opcoes: ["simples", "avancado"], selecionado: "simples"}
+    },
+    estilo: {tema: "escuro", posicao: "topo-direita", layout: "flutuante", corPrincipal: "#7b68ee"},
+    status: {microfoneDisponivel: "webkitSpeechRecognition" in window || "SpeechRecognition" in window, modoAtual: "simples", historicoCarregado: false}
+  };
 
-    function loadHistory() {
-      const saved = localStorage.getItem("mah7_history");
-      if (!saved) return;
-      JSON.parse(saved).forEach(({ text, sender }) => {
-        addMessage(text, sender);
-      });
-    }
+  // Carregar configs do localStorage ou padrão
+  let mcpConfig = JSON.parse(localStorage.getItem("mah7_mcp")) || MCP_PADRAO;
+  let modo = mcpConfig.botoes.modoResposta.selecionado;
 
-    function sendMessage() {
-      const text = inputMsg.value.trim();
-      if (!text) return;
+  // Banco aprendizado: array { pergunta, resposta }
+  let aprendizado = JSON.parse(localStorage.getItem("mah7_aprendizado")) || [];
 
-      addMessage(text, "user");
-      inputMsg.value = "";
-      btnSend.disabled = true;
+  // Funções para salvar
+  function salvarMCP() {
+    localStorage.setItem("mah7_mcp", JSON.stringify(mcpConfig));
+  }
+  function salvarAprendizado() {
+    localStorage.setItem("mah7_aprendizado", JSON.stringify(aprendizado));
+  }
+  function salvarHistorico() {
+    const all = [...chat.children].map(el => ({
+      text: el.textContent,
+      sender: el.classList.contains("user") ? "user" : "ai"
+    }));
+    localStorage.setItem("mah7_history", JSON.stringify(all));
+    mcpConfig.status.historicoCarregado = true;
+    salvarMCP();
+  }
 
-      const reply = respondTo(text);
-      setTimeout(() => {
-        addMessage(reply, "ai");
-        saveHistory();
-      }, 500);
-    }
+  // Função para adicionar mensagem na tela
+  function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = "msg " + sender;
+    msg.textContent = text;
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+  }
 
-    btnSend.addEventListener("click", sendMessage);
-    inputMsg.addEventListener("keydown", e => {
-      if (e.key === "Enter" && !btnSend.disabled) sendMessage();
-    });
+  // Carregar histórico ao abrir
+  function carregarHistorico() {
+    const salvo = localStorage.getItem("mah7_history");
+    if (!salvo) return;
+    JSON.parse(salvo).forEach(({ text, sender }) => addMessage(text, sender));
+  }
 
-    btnClear.addEventListener("click", () => {
-      if (confirm("Apagar todo o chat?")) {
-        chat.innerHTML = "";
-        localStorage.removeItem("mah7_history");
+  // Busca resposta no aprendizado por similaridade simples
+  function buscaRespostaAprendida(pergunta) {
+    pergunta = pergunta.toLowerCase();
+    for (const item of aprendizado) {
+      if (pergunta.includes(item.pergunta.toLowerCase()) || item.pergunta.toLowerCase().includes(pergunta)) {
+        return item.resposta;
       }
-    });
+    }
+    return null;
+  }
 
-    // Reconhecimento de voz (Web Speech API)
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recog = new SR();
-      recog.lang = "pt-BR";
-      recog.interimResults = false;
+  // Respostas padrão
+  function responderSimples(msg) {
+    msg = msg.toLowerCase();
+    if (msg.includes("oi")) return "Olá! Eu sou a Mah7.";
+    if (msg.includes("data") || msg.includes("hora")) return new Date().toLocaleString("pt-BR");
+    if (msg.includes("ajuda")) return "Use o painel MCP para configurar modos e limpar o chat.";
+    return null;
+  }
+  function responderAvancado(msg) {
+    return `Você disse: "${msg}". Simulando IA avançada...
 
-      recog.onresult = e => {
-        inputMsg.value = e.results[0][0].transcript;
-        btnSend.disabled = false;
-      };
+Resposta: Mah7 pode adaptar, evoluir e entender com base em contexto.`;
+  }
 
-      recog.onerror = e => {
-        alert("Erro no microfone: " + e.error);
-      };
+  // Enviar mensagem: adiciona, responde e aprende
+  function enviarMensagem() {
+    const texto = inputMsg.value.trim();
+    if (!texto) return;
 
-      btnMic.addEventListener("click", () => {
-        recog.start();
-      });
-    } else {
-      btnMic.style.display = "none"; // Oculta se o navegador não suporta
+    addMessage(texto, "user");
+    inputMsg.value = "";
+    btnSend.disabled = true;
+
+    // Tenta resposta aprendida
+    let resposta = buscaRespostaAprendida(texto);
+
+    // Se não achar, usa padrão
+    if (!resposta) {
+      resposta = modo === "simples" ? (responderSimples(texto) || "Desculpe, não entendi. Pode repetir?") : responderAvancado(texto);
     }
 
-    // Carrega histórico ao iniciar
-    loadHistory();
-  </script>
+    setTimeout(() => {
+      addMessage(resposta, "ai");
+      salvarHistorico();
+
+      // Aprende (se pergunta não existe)
+      if (!aprendizado.find(a => a.pergunta.toLowerCase() === texto.toLowerCase())) {
+        aprendizado.push({ pergunta: texto, resposta: resposta });
+        salvarAprendizado();
+      }
+    }, 500);
+  }
+
+  // Eventos e controles
+  mcpToggle.addEventListener("click", () => {
+    mcpPanel.style.display = mcpPanel.style.display === "flex" ? "none" : "flex";
+  });
+
+  inputMsg.addEventListener("input", () => {
+    btnSend.disabled = inputMsg.value.trim() === "";
+  });
+
+  btnSend.addEventListener("click", enviarMensagem);
+  inputMsg.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !btnSend.disabled) enviarMensagem();
+  });
+
+  btnClear.addEventListener("click", () => {
+    if (confirm("Apagar todo o chat e aprendizado?")) {
+      chat.innerHTML = "";
+      aprendizado = [];
+      localStorage.removeItem("mah7_history");
+      localStorage.removeItem("mah7_aprendizado");
+    }
+  });
+
+  modeSelect.value = modo;
+  modeSelect.addEventListener("change", e => {
+    modo = e.target.value;
+    mcpConfig.botoes.modoResposta.selecionado = modo;
+    mcpConfig.status.modoAtual = modo;
+    salvarMCP();
+  });
+
+  btnExport.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(mcpConfig, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mah7_mcp_config.json";
+    a.click();
+  });
+
+  btnCopy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(mcpConfig, null, 2));
+      alert("Configuração copiada!");
+    } catch (err) {
+      alert("Erro ao copiar: " + err);
+    }
+  });
+
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const reco = new SR();
+    reco.lang = "pt-BR";
+    reco.onresult = e => {
+      inputMsg.value = e.results[0][0].transcript;
+      btnSend.disabled = false;
+    };
+    reco.onerror = e => alert("Erro no microfone: " + e.error);
+    btnMic.addEventListener("click", () => reco.start());
+  } else {
+    btnMic.style.display = "none";
+  }
+
+  carregarHistorico();
+</script>
 </body>
 </html>
