@@ -1,225 +1,137 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IA Mah7 - Assistente Inteligente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mah7 - Sua Super IA</title>
   <style>
     body {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #e0e0e0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0; padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      background-color: #0f3460;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
-    }
-    header h1 {
       margin: 0;
-      color: #00e5ff;
-      text-shadow: 0 0 8px #00e5ff;
-    }
-    main {
-      flex: 1;
+      background-color: #0a0a0a;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
       display: flex;
       flex-direction: column;
-      max-width: 600px;
-      margin: 20px auto;
-      background: rgba(15, 52, 96, 0.85);
-      border-radius: 12px;
-      box-shadow: 0 0 20px #00e5ff;
-    }
-    #chat {
-      flex: 1;
-      overflow-y: auto;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
       padding: 20px;
-      font-size: 1.1rem;
-      white-space: pre-wrap;
-      user-select: text;
     }
-    .msg {
-      margin-bottom: 15px;
-      line-height: 1.4;
+
+    header {
+      margin-top: 20px;
+      text-align: center;
     }
-    .msg.user {
-      text-align: right;
-      color: #00ffd7;
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(to right, #8e2de2, #4a00e0);
+      -webkit-background-clip: text;
+      color: transparent;
     }
-    .msg.ia {
-      text-align: left;
-      color: #a0eaff;
-    }
-    form {
+
+    .terminal {
+      background-color: #1c1c1c;
+      border-radius: 10px;
+      padding: 20px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 0 10px #4a00e0;
+      margin-top: 30px;
+      overflow-y: auto;
+      height: 400px;
       display: flex;
-      padding: 10px 20px;
-      border-top: 1px solid #004466;
-      background: #0a2a4a;
-      border-radius: 0 0 12px 12px;
+      flex-direction: column;
+      justify-content: flex-end;
     }
-    input[type="text"] {
-      flex: 1;
-      padding: 10px 15px;
-      font-size: 1.1rem;
-      border-radius: 30px;
+
+    .output {
+      white-space: pre-wrap;
+      line-height: 1.4em;
+      font-family: monospace;
+      color: #adadad;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .input-line {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 10px;
       border: none;
-      outline: none;
-      background: #132f5f;
-      color: #d0f0ff;
-      box-shadow: inset 0 0 6px #00e5ff88;
-      transition: background 0.3s ease;
+      border-radius: 5px;
+      background-color: #2a2a2a;
+      color: white;
+      font-size: 1em;
     }
-    input[type="text"]:focus {
-      background: #0e2b57;
-    }
+
     button {
-      background: #00e5ff;
+      margin-left: 10px;
+      padding: 10px 20px;
       border: none;
-      color: #002f3c;
-      font-weight: 700;
-      font-size: 1.2rem;
-      padding: 0 25px;
-      margin-left: 15px;
-      border-radius: 30px;
+      border-radius: 5px;
+      background-color: #4a00e0;
+      color: white;
       cursor: pointer;
-      box-shadow: 0 4px 12px #00e5ffaa;
-      transition: background 0.3s ease;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
+
     button:hover {
-      background: #00c4d9;
-      box-shadow: 0 6px 15px #00c4d9cc;
+      background-color: #6b00f5;
     }
-    @media (max-width: 640px) {
-      main {
-        width: 90vw;
-        margin: 10px auto;
-      }
-      input[type="text"] {
-        font-size: 1rem;
+
+    @media (max-width: 600px) {
+      .terminal {
+        height: 350px;
       }
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Mah7 — Inteligência Avançada</h1>
+    <p>Pronta para te ajudar em tudo. Sem limites. Com segurança total.</p>
+  </header>
 
-<header>
-  <h1>IA Mah7 - Assistente Inteligente</h1>
-</header>
+  <div class="terminal">
+    <div class="output" id="output">
+      👋 Olá, Marlyson. Sou a Mah7. O que você precisa agora?
+    </div>
+    <div class="input-line">
+      <input id="userInput" type="text" placeholder="Digite seu comando..." autofocus />
+      <button onclick="processCommand()" aria-label="Enviar comando">Enviar</button>
+    </div>
+  </div>
 
-<main>
-  <div id="chat" aria-live="polite" role="log"></div>
+  <script>
+    function processCommand() {
+      const input = document.getElementById("userInput");
+      const output = document.getElementById("output");
+      const command = input.value.trim();
+      if (!command) return;
 
-  <form id="formChat" autocomplete="off" aria-label="Envie sua mensagem para a IA Mah7">
-    <input id="inputMsg" type="text" placeholder="Digite sua pergunta ou comando..." required />
-    <button type="submit" aria-label="Enviar mensagem">Enviar</button>
-  </form>
-</main>
+      output.innerHTML += `\n\n🧑‍💻 Você: ${command}`;
 
-<script>
-  const chat = document.getElementById('chat');
-  const form = document.getElementById('formChat');
-  const input = document.getElementById('inputMsg');
+      // Simulação de resposta
+      let response = "🤖 Mah7: Processando...";
 
-  // Histórico simples para contexto
-  const conversation = [];
-
-  // Função para adicionar mensagem no chat
-  function addMessage(text, sender = 'ia') {
-    const msgDiv = document.createElement('div');
-    msgDiv.classList.add('msg', sender);
-    msgDiv.textContent = text;
-    chat.appendChild(msgDiv);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  // Função principal que simula a IA Mah7 respondendo
-  function getMah7Response(inputText) {
-    const text = inputText.toLowerCase().trim();
-
-    // Respostas básicas
-    if (text.includes('oi') || text.includes('olá') || text.includes('e aí')) {
-      return 'Olá! Como posso ajudar você hoje?';
-    }
-
-    if (text.includes('como você está') || text.includes('tudo bem')) {
-      return 'Estou sempre pronta para ajudar! E você, como está?';
-    }
-
-    if (text.includes('tempo') || text.includes('previsão do tempo')) {
-      return 'Hoje está ensolarado com máxima de 28°C. Ótimo para aproveitar o dia!';
-    }
-
-    if (text.match(/\bquanto é\b/) || text.match(/\bcalcule\b/)) {
-      // Tentar extrair uma operação simples
-      try {
-        const expression = text.replace(/[^0-9\+\-\*\/\.\(\) ]/g, '');
-        if(expression.length > 0) {
-          // Avaliar expressão com segurança básica
-          // Nota: eval pode ser perigoso em código real, aqui é só exemplo
-          // Alternativa real: usar biblioteca matemática
-          const result = Function('"use strict";return (' + expression + ')')();
-          if (result !== undefined) {
-            return `O resultado de ${expression} é ${result}.`;
-          }
-        }
-        return 'Não consegui calcular essa expressão. Pode tentar algo mais simples?';
-      } catch {
-        return 'Parece que a conta está incorreta. Pode tentar de novo?';
+      if (command.toLowerCase().includes("ajuda")) {
+        response = "🤖 Mah7: Claro! Eu posso organizar tarefas, responder perguntas, criar textos, imagens, ou te ajudar em qualquer desafio.";
+      } else if (command.toLowerCase().includes("treino")) {
+        response = "🤖 Mah7: Seu treino está pronto! Dividido em A, B e C conforme sua rotina.";
+      } else if (command.toLowerCase().includes("obrigado")) {
+        response = "🤖 Mah7: Sempre à disposição, Marlyson.";
       }
+
+      output.innerHTML += `\n${response}`;
+      input.value = "";
+      output.scrollTop = output.scrollHeight;
     }
-
-    if (text.includes('lembrete')) {
-      return 'Funcionalidade de lembretes ainda está em desenvolvimento, mas pode me pedir outras coisas!';
-    }
-
-    if (text.includes('piada')) {
-      return 'Por que o JavaScript foi ao médico? Porque tinha muitos "bugs"! 😄';
-    }
-
-    if (text.includes('ajuda') || text.includes('o que você faz')) {
-      return 'Eu posso responder perguntas, ajudar a calcular, contar piadas, informar o tempo, e muito mais!';
-    }
-
-    // Contextual simples — baseando na última mensagem
-    if (conversation.length > 0) {
-      const lastUser = conversation[conversation.length - 1].user;
-      if (lastUser && text.includes('obrigado')) {
-        return 'De nada! Estou aqui sempre que precisar.';
-      }
-    }
-
-    return "Desculpe, ainda estou aprendendo a responder isso. Pode tentar outra pergunta?";
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const userMsg = input.value.trim();
-    if (!userMsg) return;
-
-    addMessage(userMsg, 'user');
-    conversation.push({ user: userMsg });
-
-    // Simula delay de resposta
-    setTimeout(() => {
-      const response = getMah7Response(userMsg);
-      addMessage(response, 'ia');
-      conversation.push({ ia: response });
-    }, 900);
-
-    input.value = '';
-    input.focus();
-  });
-
-  // Boas-vindas ao carregar a página
-  window.onload = () => {
-    addMessage('Olá! Eu sou a IA Mah7, sua assistente inteligente. Pergunte qualquer coisa!', 'ia');
-  };
-</script>
-
+  </script>
 </body>
 </html>
