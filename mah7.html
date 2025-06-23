@@ -2,30 +2,35 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>IA Mah7</title>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" />
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #121212;
       color: #eee;
       margin: 0; padding: 0;
       display: flex;
       flex-direction: column;
       height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      overscroll-behavior: contain;
     }
     header {
       background: #1e1e1e;
       padding: 1rem;
       text-align: center;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: bold;
       color: #7b68ee;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
     header img {
       width: 32px;
@@ -36,18 +41,19 @@
       padding: 1rem;
       display: flex;
       flex-direction: column;
-      overflow: auto;
+      overflow-y: auto;
       gap: 1rem;
+      -webkit-overflow-scrolling: touch;
     }
     #chat {
       flex: 1;
       background: #222;
       padding: 1rem;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
+      gap: 1rem;
       scrollbar-width: thin;
       scrollbar-color: #7b68ee transparent;
     }
@@ -69,6 +75,7 @@
       white-space: pre-wrap;
       line-height: 1.3;
       font-size: 1rem;
+      user-select: text;
     }
     .user {
       background: #7b68ee;
@@ -82,20 +89,26 @@
       font-style: italic;
     }
     footer {
-      padding: 1rem;
+      padding: 0.8rem 1rem;
       background: #1e1e1e;
       display: flex;
       gap: 0.5rem;
       align-items: center;
+      -webkit-user-select: text;
+      user-select: text;
     }
     input[type=text] {
       flex: 1;
-      padding: 0.6rem;
-      border-radius: 6px;
+      padding: 0.7rem;
+      border-radius: 8px;
       border: none;
       font-size: 1rem;
       background: #333;
       color: #eee;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      user-select: text;
     }
     input[type=text]::placeholder {
       color: #999;
@@ -105,11 +118,14 @@
       border: none;
       color: white;
       font-weight: bold;
-      padding: 0.6rem 1rem;
-      border-radius: 6px;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     button:disabled {
       background: #555;
@@ -118,12 +134,17 @@
     button:hover:not(:disabled) {
       background: #5a4fd1;
     }
+    button svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
     @media (max-width: 600px) {
       .msg {
         max-width: 90%;
       }
       header {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
       }
     }
   </style>
@@ -134,12 +155,24 @@
     IA Mah7
   </header>
   <main>
-    <div id="chat"></div>
+    <div id="chat" aria-live="polite" aria-label="Área de conversa"></div>
   </main>
   <footer>
-    <input id="inputMsg" type="text" placeholder="Digite sua mensagem..." autocomplete="off" />
-    <button id="btnSend" disabled>Enviar</button>
-    <button id="btnClear" title="Limpar chat" aria-label="Limpar chat">🗑️</button>
+    <input 
+      id="inputMsg" 
+      type="text" 
+      placeholder="Digite sua mensagem..." 
+      autocomplete="off" 
+      autocorrect="on" 
+      autocapitalize="sentences" 
+      aria-label="Campo para digitar mensagem" />
+    <button id="btnMic" title="Ativar ditado por voz" aria-label="Ativar ditado por voz" type="button" >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM19 11v1a7 7 0 0 1-14 0v-1H3v1a9 9 0 0 0 8 8.91V22h2v-1.09A9 9 0 0 0 21 12v-1z"/>
+      </svg>
+    </button>
+    <button id="btnSend" disabled type="button" aria-label="Enviar mensagem">Enviar</button>
+    <button id="btnClear" title="Limpar chat" aria-label="Limpar chat" type="button" >🗑️</button>
   </footer>
 
   <script>
@@ -147,13 +180,14 @@
     const inputMsg = document.getElementById('inputMsg');
     const btnSend = document.getElementById('btnSend');
     const btnClear = document.getElementById('btnClear');
+    const btnMic = document.getElementById('btnMic');
 
-    // Habilita botão só se tiver texto
+    // Habilita botão enviar só se houver texto
     inputMsg.addEventListener('input', () => {
       btnSend.disabled = inputMsg.value.trim() === '';
     });
 
-    // Adiciona mensagem no chat (user ou ai)
+    // Adiciona mensagem na tela
     function addMessage(text, sender) {
       const div = document.createElement('div');
       div.classList.add('msg', sender);
@@ -162,18 +196,18 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // Salvar histórico no localStorage
+    // Salva histórico no localStorage
     function saveHistory(history) {
       localStorage.setItem('mah7_chat_history', JSON.stringify(history));
     }
 
-    // Carregar histórico do localStorage
+    // Carrega histórico do localStorage
     function loadHistory() {
       const h = localStorage.getItem('mah7_chat_history');
       return h ? JSON.parse(h) : [];
     }
 
-    // Atualiza o chat visual com o histórico
+    // Renderiza histórico na tela
     function renderHistory() {
       chat.innerHTML = '';
       const history = loadHistory();
@@ -182,11 +216,10 @@
       });
     }
 
-    // Resposta simples da IA Mah7
+    // Resposta simples simulada
     function respondTo(message) {
       message = message.toLowerCase();
 
-      // Comandos simples
       if(message.includes('oi') || message.includes('olá')) {
         return 'Olá! Eu sou a Mah7, sua assistente virtual.';
       }
@@ -208,50 +241,86 @@ Experimente!`;
         return 'Este é o projeto Mah7, sua IA assistente pessoal em desenvolvimento!';
       }
 
-      // Resposta default
       return 'Desculpe, não entendi. Pode tentar outra pergunta?';
     }
 
-    // Carregar histórico ao abrir a página
-    renderHistory();
-
-    // Enviar mensagem
-    btnSend.addEventListener('click', () => {
+    // Função enviar mensagem
+    async function sendMessage() {
       const userText = inputMsg.value.trim();
       if(!userText) return;
 
       addMessage(userText, 'user');
-
-      // Salvar no histórico
       const history = loadHistory();
       history.push({text: userText, sender: 'user'});
 
       inputMsg.value = '';
       btnSend.disabled = true;
 
-      setTimeout(() => {
-        const reply = respondTo(userText);
-        addMessage(reply, 'ai');
+      // Simula resposta da IA
+      await new Promise(r => setTimeout(r, 700));
+      const reply = respondTo(userText);
+      addMessage(reply, 'ai');
 
-        history.push({text: reply, sender: 'ai'});
-        saveHistory(history);
-      }, 800);
-    });
+      history.push({text: reply, sender: 'ai'});
+      saveHistory(history);
+    }
 
-    // Enter para enviar
+    btnSend.addEventListener('click', sendMessage);
     inputMsg.addEventListener('keydown', e => {
       if(e.key === 'Enter' && !btnSend.disabled) {
-        btnSend.click();
+        sendMessage();
       }
     });
 
-    // Limpar chat e histórico
     btnClear.addEventListener('click', () => {
       if(confirm('Deseja realmente limpar todo o histórico do chat?')) {
         localStorage.removeItem('mah7_chat_history');
         chat.innerHTML = '';
       }
     });
+
+    // Ditado por voz (Web Speech API)
+    let recognition;
+    if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        inputMsg.value = transcript;
+        btnSend.disabled = transcript.trim() === '';
+        inputMsg.focus();
+      };
+
+      recognition.onerror = (event) => {
+        alert('Erro no reconhecimento de voz: ' + event.error);
+      };
+
+      recognition.onend = () => {
+        btnMic.textContent = '🎤';
+      };
+
+      btnMic.addEventListener('click', () => {
+        if(btnMic.classList.contains('listening')) {
+          recognition.stop();
+          btnMic.classList.remove('listening');
+          btnMic.textContent = '🎤';
+        } else {
+          recognition.start();
+          btnMic.classList.add('listening');
+          btnMic.textContent = '🛑';
+        }
+      });
+    } else {
+      // Não suporta reconhecimento de voz
+      btnMic.style.display = 'none';
+    }
+
+    // Ao abrir, renderiza histórico
+    renderHistory();
   </script>
 </body>
 </html>
