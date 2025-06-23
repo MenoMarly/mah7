@@ -2,325 +2,194 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IA Mah7</title>
   <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" />
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
       background: #121212;
       color: #eee;
-      margin: 0; padding: 0;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-user-select: none;
-      user-select: none;
-      overscroll-behavior: contain;
     }
     header {
       background: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.6rem;
-      font-weight: bold;
       color: #7b68ee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-    header img {
-      width: 32px;
-      height: 32px;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
     main {
       flex: 1;
       padding: 1rem;
-      display: flex;
-      flex-direction: column;
       overflow-y: auto;
-      gap: 1rem;
-      -webkit-overflow-scrolling: touch;
     }
     #chat {
-      flex: 1;
-      background: #222;
-      padding: 1rem;
-      border-radius: 10px;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      scrollbar-width: thin;
-      scrollbar-color: #7b68ee transparent;
-    }
-    #chat::-webkit-scrollbar {
-      width: 8px;
-    }
-    #chat::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    #chat::-webkit-scrollbar-thumb {
-      background-color: #7b68ee;
-      border-radius: 4px;
     }
     .msg {
-      max-width: 70%;
-      padding: 0.6rem 1rem;
+      max-width: 80%;
+      padding: 0.7rem 1rem;
       border-radius: 20px;
       word-wrap: break-word;
       white-space: pre-wrap;
-      line-height: 1.3;
-      font-size: 1rem;
-      user-select: text;
     }
     .user {
-      background: #7b68ee;
       align-self: flex-end;
+      background-color: #7b68ee;
       color: white;
     }
     .ai {
-      background: #333;
       align-self: flex-start;
+      background-color: #333;
       color: #ccc;
       font-style: italic;
     }
     footer {
-      padding: 0.8rem 1rem;
       background: #1e1e1e;
       display: flex;
       gap: 0.5rem;
+      padding: 1rem;
       align-items: center;
-      -webkit-user-select: text;
-      user-select: text;
     }
-    input[type=text] {
+    input[type="text"] {
       flex: 1;
-      padding: 0.7rem;
+      padding: 0.6rem;
       border-radius: 8px;
       border: none;
       font-size: 1rem;
       background: #333;
-      color: #eee;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      user-select: text;
-    }
-    input[type=text]::placeholder {
-      color: #999;
+      color: white;
     }
     button {
       background: #7b68ee;
-      border: none;
       color: white;
-      font-weight: bold;
-      padding: 0.7rem 1rem;
+      border: none;
+      padding: 0.6rem 1rem;
       border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     button:disabled {
       background: #555;
       cursor: not-allowed;
     }
-    button:hover:not(:disabled) {
-      background: #5a4fd1;
-    }
-    button svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
-    }
-    @media (max-width: 600px) {
-      .msg {
-        max-width: 90%;
-      }
-      header {
-        font-size: 1.3rem;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>
-    <img src="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" alt="Cérebro IA" />
-    IA Mah7
-  </header>
+  <header>IA Mah7</header>
   <main>
-    <div id="chat" aria-live="polite" aria-label="Área de conversa"></div>
+    <div id="chat"></div>
   </main>
   <footer>
-    <input 
-      id="inputMsg" 
-      type="text" 
-      placeholder="Digite sua mensagem..." 
-      autocomplete="off" 
-      autocorrect="on" 
-      autocapitalize="sentences" 
-      aria-label="Campo para digitar mensagem" />
-    <button id="btnMic" title="Ativar ditado por voz" aria-label="Ativar ditado por voz" type="button" >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM19 11v1a7 7 0 0 1-14 0v-1H3v1a9 9 0 0 0 8 8.91V22h2v-1.09A9 9 0 0 0 21 12v-1z"/>
-      </svg>
-    </button>
-    <button id="btnSend" disabled type="button" aria-label="Enviar mensagem">Enviar</button>
-    <button id="btnClear" title="Limpar chat" aria-label="Limpar chat" type="button" >🗑️</button>
+    <input type="text" id="inputMsg" placeholder="Digite aqui..." />
+    <button id="btnMic">🎤</button>
+    <button id="btnSend" disabled>Enviar</button>
+    <button id="btnClear">🗑️</button>
   </footer>
 
   <script>
-    const chat = document.getElementById('chat');
-    const inputMsg = document.getElementById('inputMsg');
-    const btnSend = document.getElementById('btnSend');
-    const btnClear = document.getElementById('btnClear');
-    const btnMic = document.getElementById('btnMic');
+    const chat = document.getElementById("chat");
+    const inputMsg = document.getElementById("inputMsg");
+    const btnSend = document.getElementById("btnSend");
+    const btnClear = document.getElementById("btnClear");
+    const btnMic = document.getElementById("btnMic");
 
-    // Habilita botão enviar só se houver texto
-    inputMsg.addEventListener('input', () => {
-      btnSend.disabled = inputMsg.value.trim() === '';
+    inputMsg.addEventListener("input", () => {
+      btnSend.disabled = inputMsg.value.trim() === "";
     });
 
-    // Adiciona mensagem na tela
     function addMessage(text, sender) {
-      const div = document.createElement('div');
-      div.classList.add('msg', sender);
-      div.textContent = text;
-      chat.appendChild(div);
+      const msg = document.createElement("div");
+      msg.className = "msg " + sender;
+      msg.textContent = text;
+      chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
     }
 
-    // Salva histórico no localStorage
-    function saveHistory(history) {
-      localStorage.setItem('mah7_chat_history', JSON.stringify(history));
+    function respondTo(message) {
+      const msg = message.toLowerCase();
+      if (msg.includes("oi") || msg.includes("olá")) return "Olá! Eu sou a Mah7.";
+      if (msg.includes("como você está")) return "Estou ótima! Pronta pra te ajudar.";
+      if (msg.includes("data") || msg.includes("hora")) return new Date().toLocaleString("pt-BR");
+      if (msg.includes("projeto mah7")) return "O projeto Mah7 é a IA que você está usando agora!";
+      return "Desculpe, não entendi. Pode repetir?";
     }
 
-    // Carrega histórico do localStorage
+    function saveHistory() {
+      const all = [...chat.children].map(el => ({
+        text: el.textContent,
+        sender: el.classList.contains("user") ? "user" : "ai"
+      }));
+      localStorage.setItem("mah7_history", JSON.stringify(all));
+    }
+
     function loadHistory() {
-      const h = localStorage.getItem('mah7_chat_history');
-      return h ? JSON.parse(h) : [];
-    }
-
-    // Renderiza histórico na tela
-    function renderHistory() {
-      chat.innerHTML = '';
-      const history = loadHistory();
-      history.forEach(({text, sender}) => {
+      const saved = localStorage.getItem("mah7_history");
+      if (!saved) return;
+      JSON.parse(saved).forEach(({ text, sender }) => {
         addMessage(text, sender);
       });
     }
 
-    // Resposta simples simulada
-    function respondTo(message) {
-      message = message.toLowerCase();
+    function sendMessage() {
+      const text = inputMsg.value.trim();
+      if (!text) return;
 
-      if(message.includes('oi') || message.includes('olá')) {
-        return 'Olá! Eu sou a Mah7, sua assistente virtual.';
-      }
-      if(message.includes('como você está')) {
-        return 'Estou sempre pronta para ajudar você!';
-      }
-      if(message.includes('ajuda')) {
-        return `Você pode me perguntar sobre:
-- Informações gerais
-- Data e hora atual
-- Comandos básicos
-- Atualizar projeto Mah7
-Experimente!`;
-      }
-      if(message.includes('data') || message.includes('hora')) {
-        return `Agora é: ${new Date().toLocaleString('pt-BR')}`;
-      }
-      if(message.includes('projeto mah7')) {
-        return 'Este é o projeto Mah7, sua IA assistente pessoal em desenvolvimento!';
-      }
-
-      return 'Desculpe, não entendi. Pode tentar outra pergunta?';
-    }
-
-    // Função enviar mensagem
-    async function sendMessage() {
-      const userText = inputMsg.value.trim();
-      if(!userText) return;
-
-      addMessage(userText, 'user');
-      const history = loadHistory();
-      history.push({text: userText, sender: 'user'});
-
-      inputMsg.value = '';
+      addMessage(text, "user");
+      inputMsg.value = "";
       btnSend.disabled = true;
 
-      // Simula resposta da IA
-      await new Promise(r => setTimeout(r, 700));
-      const reply = respondTo(userText);
-      addMessage(reply, 'ai');
-
-      history.push({text: reply, sender: 'ai'});
-      saveHistory(history);
+      const reply = respondTo(text);
+      setTimeout(() => {
+        addMessage(reply, "ai");
+        saveHistory();
+      }, 500);
     }
 
-    btnSend.addEventListener('click', sendMessage);
-    inputMsg.addEventListener('keydown', e => {
-      if(e.key === 'Enter' && !btnSend.disabled) {
-        sendMessage();
+    btnSend.addEventListener("click", sendMessage);
+    inputMsg.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !btnSend.disabled) sendMessage();
+    });
+
+    btnClear.addEventListener("click", () => {
+      if (confirm("Apagar todo o chat?")) {
+        chat.innerHTML = "";
+        localStorage.removeItem("mah7_history");
       }
     });
 
-    btnClear.addEventListener('click', () => {
-      if(confirm('Deseja realmente limpar todo o histórico do chat?')) {
-        localStorage.removeItem('mah7_chat_history');
-        chat.innerHTML = '';
-      }
-    });
+    // Reconhecimento de voz (Web Speech API)
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recog = new SR();
+      recog.lang = "pt-BR";
+      recog.interimResults = false;
 
-    // Ditado por voz (Web Speech API)
-    let recognition;
-    if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
-      recognition.interimResults = false;
-      recognition.continuous = false;
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        inputMsg.value = transcript;
-        btnSend.disabled = transcript.trim() === '';
-        inputMsg.focus();
+      recog.onresult = e => {
+        inputMsg.value = e.results[0][0].transcript;
+        btnSend.disabled = false;
       };
 
-      recognition.onerror = (event) => {
-        alert('Erro no reconhecimento de voz: ' + event.error);
+      recog.onerror = e => {
+        alert("Erro no microfone: " + e.error);
       };
 
-      recognition.onend = () => {
-        btnMic.textContent = '🎤';
-      };
-
-      btnMic.addEventListener('click', () => {
-        if(btnMic.classList.contains('listening')) {
-          recognition.stop();
-          btnMic.classList.remove('listening');
-          btnMic.textContent = '🎤';
-        } else {
-          recognition.start();
-          btnMic.classList.add('listening');
-          btnMic.textContent = '🛑';
-        }
+      btnMic.addEventListener("click", () => {
+        recog.start();
       });
     } else {
-      // Não suporta reconhecimento de voz
-      btnMic.style.display = 'none';
+      btnMic.style.display = "none"; // Oculta se o navegador não suporta
     }
 
-    // Ao abrir, renderiza histórico
-    renderHistory();
+    // Carrega histórico ao iniciar
+    loadHistory();
   </script>
 </body>
 </html>
